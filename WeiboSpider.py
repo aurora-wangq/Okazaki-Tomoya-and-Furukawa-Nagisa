@@ -18,7 +18,7 @@ try:
     useless_share_sum = 0
     
     text = parse.quote(input("[INFO] Input text:"))
-    browser = webdriver.Edge()
+    browser = webdriver.Chrome()
     browser.minimize_window()
     print("[INFO] WebDriver started successfully!")
     browser.get(f'https://s.weibo.com/weibo?q={text}&nodup=1&page=1')#&nodup=1是微博搜索的“显示所有结果”值
@@ -93,22 +93,23 @@ try:
                for i in useless_like_count:
                     for j in i:
                          if j != '赞':
-                              j.replace('万+','0000')
+                              j = j.replace('万+','0000')
                               useless_like_sum += int(j)
                for i in useless_comment_count:
                     for j in i:
                          if j != '评论':
-                              j.replace('万+','0000')
+                              j = j.replace('万+','0000')
                               useless_comment_sum += int(j)
                for i in useless_share_count:
                     for j in i:
                          if j != '转发':
-                              j.replace('万+','0000')
+                              j = j.replace('万+','0000')
                               useless_share_sum += int(j)
-          print(f"[INFO] Page {page} crawling completed!")
+          print(f"[INFO] Page {page} Finished! Retweet: {share_sum-useless_share_sum} Comment: {comment_sum-useless_comment_sum} Like: {like_sum-useless_like_sum} Post: {post_sum-retwee_sum*2} Final score: {0.3*(share_sum-useless_share_sum)+0.3*(comment_sum-useless_comment_sum)+0.3*(post_sum-retwee_sum*2)+0.1*(like_sum-useless_like_sum)}")
           # with open(path1, 'w', encoding='utf8') as f:
           #      f.write(browser.page_source)
-    print(f"[INFO] Retweet: {share_sum-useless_share_sum} Comment: {comment_sum-useless_comment_sum} Like: {like_sum-useless_like_sum} Post: {post_sum-retwee_sum*2} Final score: {0.3*(share_sum-useless_share_sum)+0.3*(comment_sum-useless_comment_sum)+0.3*(post_sum-retwee_sum*2)+0.1*(like_sum-useless_like_sum)}")
+    print('[INFO] Crawler stopped!')
+    print(f'[INFO] 发布:{post_sum-retwee_sum*2}\n[INFO] 转发:{share_sum-useless_share_sum}\n[INFO] 评论:{comment_sum-useless_comment_sum}\n[INFO] 点赞:{like_sum-useless_like_sum}\n[INFO] 总分:{0.3*(share_sum-useless_share_sum)+0.3*(comment_sum-useless_comment_sum)+0.3*(post_sum-retwee_sum*2)+0.1*(like_sum-useless_like_sum)}')
     input("[INFO] Push any key to shutdown...")
 finally:#结束
     browser.close()
