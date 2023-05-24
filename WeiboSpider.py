@@ -4,6 +4,7 @@ import time
 import re
 import json
 import os
+from urllib import parse
 try:
     like_sum = 0
     comment_sum = 0
@@ -16,11 +17,11 @@ try:
     useless_comment_sum = 0
     useless_share_sum = 0
     
-    url_ = input("[INFO] Input url:")
+    text = parse.quote(input("[INFO] Input text:"))
     browser = webdriver.Edge()
     browser.minimize_window()
     print("[INFO] WebDriver started successfully!")
-    browser.get(f'{url_}&nodup=1&page=1')#&nodup=1是微博搜索的“显示所有结果”值
+    browser.get(f'https://s.weibo.com/weibo?q={text}&nodup=1&page=1')#&nodup=1是微博搜索的“显示所有结果”值
     time.sleep(5)#不睡几秒cookies来不及加载
 
     #暴风吸入cookies
@@ -45,14 +46,14 @@ try:
     
     print("[INFO] Cookies had been read in!\n[INFO] Retrieving page!")
     #爬
-    browser.get(f'{url_}&nodup=1&page=1')#必须要在获取一遍因为第一遍获取被登录阻拦了
+    browser.get(f'https://s.weibo.com/weibo?q={text}&nodup=1&page=1')#必须要在获取一遍因为第一遍获取被登录阻拦了
     print('[INFO] Succeed!')
 
     max_page = 50#最大页数,貌似在“显示所有结果的情况下”固定是50页
     print(f'[INFO] MAX_PAGE default to {max_page}')
     print("[INFO] Starting crawling!")
     for page in range(1,max_page+1):
-          browser.get(f'{url_}&nodup=1&page={page}')
+          browser.get(f'https://s.weibo.com/weibo?q={text}&nodup=1&page={page}')
 
           result_t_or_f = re.findall('抱歉，未找到相关结果。',browser.page_source)
 
