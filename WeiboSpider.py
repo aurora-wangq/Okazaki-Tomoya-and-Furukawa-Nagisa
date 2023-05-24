@@ -26,6 +26,7 @@ try:
 
     #暴风吸入cookies
     path = os.getcwd()+r'\cookiess.txt'
+    path1 = os.getcwd()+r'\cookiesss.txt'
     with open(path, 'r', encoding='utf8') as f:
           listCookies = json.loads(f.read())
 
@@ -54,28 +55,34 @@ try:
     print("[INFO] Starting crawling!")
     for page in range(1,max_page+1):
           browser.get(f'https://s.weibo.com/weibo?q={text}&nodup=1&page={page}')
-
+          #time.sleep(1)
           result_t_or_f = re.findall('抱歉，未找到相关结果。',browser.page_source)
 
           if len(result_t_or_f) == 0:
-               like_count = re.findall(r'class="woo-like-count">(\d+)</span',browser.page_source)
-               comment_count =re.findall(r'<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(\d+)</a></li>',browser.page_source)
-               share_count = re.findall(r'<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(\d+)</a></li>',browser.page_source)
+               like_count = re.findall(r'class="woo-like-count">(.*?)</span',browser.page_source)
+               comment_count =re.findall(r'<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
+               share_count = re.findall(r'<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
                post_each_page = len(re.findall(r'class="woo-like-count">',browser.page_source))
 
                retwee_each_page = len(re.findall('node-type="feed_list_forwardContent"',browser.page_source))
 
-               useless_like_count = re.findall(r'node-type="feed_list_forwardContent".*?woo-like-count">(.*?)</span>.*?woo-like-count">(.*?)</span>',browser.page_source)
-               useless_comment_count = re.findall(r'node-type="feed_list_forwardContent".*?<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(.*?)</a></li>.*?<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
-               useless_share_count = re.findall(r'node-type="feed_list_forwardContent".*?<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(.*?)</a></li>.*?<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
+               useless_like_count = re.findall(r'node-type="feed_list_forwardContent".[\w\W]*?woo-like-count">(.*?)</span>[\w\W]*?woo-like-count">(.*?)</span>',browser.page_source)
+               useless_comment_count = re.findall(r'node-type="feed_list_forwardContent".[\w\W]*?<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(.*?)</a></li>[\w\W]*?<i class="woo-font woo-font--comment toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
+               useless_share_count = re.findall(r'node-type="feed_list_forwardContent".[\w\W]*?<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(.*?)</a></li>[\w\W]*?<i class="woo-font woo-font--retweet toolbar_icon"></i></span>\s*(.*?)</a></li>',browser.page_source)
 
                #点赞、评论、分享、帖子总数(含转发即useless)
                for i in like_count:
-                    like_sum += int(i)
+                    if i != '赞':
+                         i = i.replace('万+','0000')
+                         like_sum += int(i)
                for i in comment_count:
-                    comment_sum += int(i)
+                    if i != '评论':
+                         i = i.replace('万+','0000')
+                         comment_sum += int(i)
                for i in share_count:
-                    share_sum += int(i)
+                    if i != '转发':
+                         i = i.replace('万+','0000')
+                         share_sum += int(i)
                post_sum += post_each_page
 
                #useless帖子条数
@@ -86,18 +93,22 @@ try:
                for i in useless_like_count:
                     for j in i:
                          if j != '赞':
+                              j.replace('万+','0000')
                               useless_like_sum += int(j)
                for i in useless_comment_count:
                     for j in i:
                          if j != '评论':
+                              j.replace('万+','0000')
                               useless_comment_sum += int(j)
                for i in useless_share_count:
                     for j in i:
                          if j != '转发':
+                              j.replace('万+','0000')
                               useless_share_sum += int(j)
           print(f"[INFO] Page {page} crawling completed!")
-
-    print(f"[INFO] Retweet: {share_sum-useless_share_sum} Comment: {comment_sum-useless_comment_sum} Like: {like_sum-useless_like_sum} Post: {post_sum-retwee_sum*2}")
+          # with open(path1, 'w', encoding='utf8') as f:
+          #      f.write(browser.page_source)
+    print(f"[INFO] Retweet: {share_sum-useless_share_sum} Comment: {comment_sum-useless_comment_sum} Like: {like_sum-useless_like_sum} Post: {post_sum-retwee_sum*2} Final score: {0.3*(share_sum-useless_share_sum)+0.3*(comment_sum-useless_comment_sum)+0.3*(post_sum-retwee_sum*2)+0.1*(like_sum-useless_like_sum)}")
     input("[INFO] Push any key to shutdown...")
 finally:#结束
     browser.close()
